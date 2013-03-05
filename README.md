@@ -3,6 +3,15 @@ linux performance monitoring and visualization
 
 linux 性能监控与图像显示
 
+#### Introduction
+
+启动、关闭~sar~监控系统运行状态，并将性能运行信息写入文件,
+显示性能曲线，清理数据文件。
+显示性能曲线时，根据性能测试的需求，对原始数据进行滤波。
+
+滤波原理: 消除周期小、波动幅度低
+的短脉冲，保留缓慢变化曲线和波动幅度大于阈值(默认 5%)的短脉冲。
+
 #### usage
 
 <pre><code>
