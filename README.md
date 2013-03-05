@@ -1,9 +1,9 @@
-performance-monitoring
-======================
+linux performance monitoring and visualization
+==============================================
 
-linux performance monitoring and 可视化
+linux 性能监控与图像显示
 
-#### 启动性能监控脚本，cpu与memory信息记录于文件中。
+#### usage
 
 <pre><code>
 # start, output in: filePrefix_timestamp_cpu.txt,filePrefix_timestamp_mem.txt
