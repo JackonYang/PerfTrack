@@ -13,7 +13,7 @@ times暂时为运行次数。根据runtime计算最佳统计间隔和次数的�
 
 #### 查看CPU与mem统计图像。
 
-`python watch_show.py timestamp`
+`python watch_show.py filePrefix_timestamp`
 
 #### 脚本停止与环境清理
 
