@@ -1,17 +1,18 @@
-#show cpu and memory runtime infomation
+"""show cpu and memory performance infomation"""
 import os
 import sys
 import numpy as np
 import matplotlib.pyplot as plt
 
-def keep_peak(orig_data,step=7,peak_range=5):
+
+def keep_peak(orig_data, step=7, peak_range=5):
 	"""wave filtration
 
 	if max-min <= peak_range, return 2 middle data
 	else return max and min row"""
 
 	res=[]
-	for i in range(0,len(orig_data),step):
+	for i in range(0, len(orig_data), step):
 		cut=orig_data[i:i+step]
 		cut.sort()
 		if float(cut[-1])-float(cut[0])<peak_range:
@@ -21,16 +22,18 @@ def keep_peak(orig_data,step=7,peak_range=5):
 		else:
 			# take the max and min in the orig sequence
 			if orig_data[i:i+step].index(cut[0])<orig_data[i:i+step].index(cut[-1]):
-				res.extend([cut[0],cut[-1]])
+				res.extend([cut[0], cut[-1]])
 			else:
-				res.extend([cut[-1],cut[0]])
+				res.extend([cut[-1], cut[0]])
 	return res
 
-def read_data(filename,dataToRead=None):
-	""" read performance data from files, 
+
+def read_data(filename, dataToRead=None):
+	""" read performance data from file
+
 	return a dictionary(performance_index:data)"""
 
-	with open(filename,'r') as f:
+	with open(filename, 'r') as f:
 		def get_title(f):
 			"""skip line before title, and read title line"""
 			line=f.readline()
@@ -48,11 +51,12 @@ def read_data(filename,dataToRead=None):
 			data[tag]=[]
 		# read data
 		for line in f.readlines():
-			for tag,value in zip(title,line.split()):
+			for tag, value in zip(title, line.split()):
 				data[tag].append(value)
 	return data
 
-def plot(data):#data:dict
+
+def plot(data):  # data:dict
 	"""plot data"""
 
 	for y in data.values():
@@ -61,13 +65,15 @@ def plot(data):#data:dict
 	plt.title("cpu and memory performance figure")
 	plt.show()
 
+
 def data_to_show(data):
 	"""format useful info of cpu performance"""
 	res={}
-	for key in set(data.keys() & {'%user','%usr','%system','%sys','%idle','%memused'}):
+	for key in set(data.keys() & {'%user', '%usr', '%system', '%sys', '%idle', '%memused'}):
 		res[key]=keep_peak(data[key])
 
 	return res
+
 
 def main(filename_pre='test_03041503'):
 	filterd={}
@@ -77,15 +83,3 @@ def main(filename_pre='test_03041503'):
 
 filename_pre=sys.argv[1]
 main(filename_pre)
-
-#idxIdle=2
-
-#path of data files
-#s=os.getcwd()
-#data files to plot
-#files=[files for files in os.listdir(s) if (files.find(timestamp) > -1)]
-
-#cpu idle operate
-#cpudata[idxIdle][0]="%totalCPUUsed"
-#for i in range(1,len(cpudata[idxIdle])):
-#	cpudata[idxIdle][i]=100-float(cpudata[idxIdle][i])
