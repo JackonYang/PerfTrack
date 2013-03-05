@@ -5,7 +5,7 @@ linux performance monitoring and 可视化
 
 #### 启动性能监控脚本，cpu与memory信息记录于文件中。
 
-``` bash cmd to run
+<pre><code>
 # start, output in: filePrefix_timestamp_cpu.txt,filePrefix_timestamp_mem.txt
 $ ./watch.sh start filePrefix`
 # stop script
@@ -14,6 +14,7 @@ $ ./watch.sh stop
 $ ./watch.sh show filePre_with_timestamp
 # rm data files
 $ ./watch.sh clean
+</code></pre>
 
 ![example of monitor][exp_monitor]
 
