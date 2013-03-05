@@ -1,5 +1,4 @@
 #/bin/bash
-exec 2>/dev/null
+#exec 2>/dev/null
 
-rm *_cpu.txt
-rm *_mem.txt
+rm -f *_cpu.txt *_mem.txt
