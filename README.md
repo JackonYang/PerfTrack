@@ -12,6 +12,10 @@ linux 性能监控与图像显示
 滤波原理: 消除周期小、波动幅度低
 的短脉冲，保留缓慢变化曲线和波动幅度大于阈值(默认 5%)的短脉冲。
 
+#### INSTALL
+
+`$ sudo pip install -r requirement.txt`
+
 #### usage
 
 <pre><code>
