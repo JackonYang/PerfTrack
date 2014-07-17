@@ -3,7 +3,7 @@
 function start {
 	#usage ./watch_start filePrefix runtime
 
-	inteval=1
+	interval=1
 	filePrefix=$1
 	timestamp=`date +%m%d%H%M`
 
@@ -11,8 +11,8 @@ function start {
 	memFile=`echo $filePrefix\_$timestamp\_mem.txt`
 	#ioFile=`echo $filePrefix\_$timestamp\_io.txt`
 
-	sar $inteval >> $cpuFile &
-	sar -r $inteval >> $memFile &
+	sar $interval >> $cpuFile &
+	sar -r $interval >> $memFile &
 }
 
 function stop {
