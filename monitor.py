@@ -1,6 +1,7 @@
 # -*- coding: utf-8-*-
 import psutil
 import time
+import threading
 
 def get_proc_by_name(pname):
     """ get process by name
@@ -17,11 +18,28 @@ def get_proc_by_name(pname):
             pass
     return None
 
-def run(proc, interval=1):
-    while(True):
-        print proc.memory_info().rss
-        time.sleep(interval)
+
+class ProcWatcher(threading.Thread):
+    def __init__(self, proc, output, interval):
+        threading.Thread.__init__(self)
+        self.m_proc = proc
+        self.thread_stop = False
+        self.output = output
+        self.interval = interval
+
+    def run(self):
+        while not self.thread_stop:
+            self.output(self.m_proc.memory_info().rss)
+            time.sleep(self.interval)
+
+    def stop(self):
+        self.thread_stop = True  
+
 
 if '__main__' == __name__:
-    proc = get_proc_by_name("CHrome")
-    run(proc)
+    def tout(msg):
+        print msg
+    mem_watcher = ProcWatcher(get_proc_by_name("CHrome"), tout, 1)
+    mem_watcher.start()
+    time.sleep(10)
+    mem_watcher.stop()
