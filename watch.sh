@@ -28,7 +28,7 @@ function clean {
 }
 
 function show {
-	python3 show.py $1
+	python show.py $1
 }
 
 # cmd, filename_pre
