@@ -2,6 +2,7 @@
 import wx
 import monitor
 
+
 class MonitorFrame(wx.Frame):
     def __init__(self):
         wx.Frame.__init__(self, parent=None, id=-1,
@@ -20,10 +21,15 @@ class MonitorFrame(wx.Frame):
         self.stopBtn = wx.Button(parent=self, label="Stop")
         self.showBtn = wx.Button(parent=self, label="Show")
 
+        self.proc_name_label = wx.StaticText(parent=self, label='Process Name', style=wx.ALIGN_CENTER)
+        self.proc_name_value = wx.TextCtrl(parent=self, value='python')
+
         self.startBtn.Enable()
         self.stopBtn.Disable()
 
         self.toolbox = wx.BoxSizer(wx.VERTICAL)
+        self.toolbox.Add(self.proc_name_label, 1, wx.ALL | wx.EXPAND, 5, 0)
+        self.toolbox.Add(self.proc_name_value, 1, wx.ALL | wx.EXPAND, 5, 0)
         self.toolbox.Add(self.startBtn, 1, wx.ALL | wx.EXPAND, 5, 0)
         self.toolbox.Add(self.showBtn, 1, wx.ALL | wx.EXPAND, 5, 0)
         self.toolbox.Add(self.stopBtn, 1, wx.ALL | wx.EXPAND, 5, 0)
@@ -47,7 +53,8 @@ class MonitorFrame(wx.Frame):
         self.showBtn.Disable()
         self.stopBtn.Enable()
         # start thread
-        self.mem_watcher = monitor.ProcWatcher(monitor.get_proc_by_name("python"), self.perf_log.AppendText, 1)
+        proc = monitor.get_proc_by_name(self.proc_name_value.GetValue())
+        self.mem_watcher = monitor.ProcWatcher(proc, self.perf_log.AppendText, 1)
         self.mem_watcher.start()
 
     def OnStopScan(self, event):
@@ -56,6 +63,7 @@ class MonitorFrame(wx.Frame):
         self.stopBtn.Disable()
         # stop thread
         self.mem_watcher.stop()
+
 
 class MonitorUI(wx.App):
 
