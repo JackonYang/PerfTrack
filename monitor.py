@@ -29,7 +29,7 @@ class ProcWatcher(threading.Thread):
 
     def run(self):
         while not self.thread_stop:
-            self.output(self.m_proc.memory_info().rss)
+            self.output('%.4f MB\n' % (float(self.m_proc.memory_info().rss)/1024/1024))
             time.sleep(self.interval)
 
     def stop(self):

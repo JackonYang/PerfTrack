@@ -1,12 +1,12 @@
 # -*- coding: utf-8-*-
 import wx
+import monitor
 
 class MonitorFrame(wx.Frame):
     def __init__(self):
         wx.Frame.__init__(self, parent=None, id=-1,
                 title="PerfTrack",
                 pos=(100, 100), size=(500, 600))
-
         self.BuildUI()
 
     def BuildUI(self):
@@ -47,12 +47,15 @@ class MonitorFrame(wx.Frame):
         self.showBtn.Disable()
         self.stopBtn.Enable()
         # start thread
+        self.mem_watcher = monitor.ProcWatcher(monitor.get_proc_by_name("python"), self.perf_log.AppendText, 1)
+        self.mem_watcher.start()
 
     def OnStopScan(self, event):
         self.startBtn.Enable()
         self.showBtn.Enable()
         self.stopBtn.Disable()
         # stop thread
+        self.mem_watcher.stop()
 
 class MonitorUI(wx.App):
 
