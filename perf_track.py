@@ -19,7 +19,8 @@ class MonitorFrame(wx.Frame):
         self.proc_name_box.Add(self.proc_name_label, 1, wx.ALIGN_CENTER, 5, 0)
         self.proc_name_box.Add(self.proc_name_value, 2, wx.ALIGN_CENTER, 5, 0)
 
-        self.proc_msg = wx.StaticText(parent=self, label='Please input a process name or ID', style=wx.LEFT)
+        self.proc_msg = wx.TextCtrl(parent=self, value='Please input a process name or ID', size=(450, 30), style=wx.TE_READONLY|wx.BORDER_NONE)
+        self.proc_msg.SetBackgroundColour(self.proc_name_label.BackgroundColour)
         msg_font = wx.Font(10, wx.DECORATIVE, wx.ITALIC, wx.NORMAL)
         self.proc_msg.SetFont(msg_font)
         #self.proc_name = wx.SearchCtrl(self)
@@ -60,6 +61,7 @@ class MonitorFrame(wx.Frame):
 
         self.startBtn.Bind(wx.EVT_BUTTON, self.OnStartScan)
         self.stopBtn.Bind(wx.EVT_BUTTON, self.OnStopScan)
+        self.proc_name_value.Bind(wx.EVT_KILL_FOCUS, self.OnProcInput)
 
     def OnStartScan(self, event):
         # clear log if too big
@@ -82,6 +84,11 @@ class MonitorFrame(wx.Frame):
         self.stopBtn.Disable()
         # stop thread
         self.mem_watcher.stop()
+
+    def OnProcInput(self, event):
+        pass
+        # self.proc_msg.
+
 
 
 class MonitorUI(wx.App):
