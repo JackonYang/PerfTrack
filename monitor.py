@@ -3,6 +3,14 @@ import psutil
 import time
 import threading
 
+
+def init_proc(pid):
+    try:
+        return psutil.Process(pid)
+    except psutil.NoSuchProcess:
+        return None
+
+
 def find_proc(pname):
     """ get process by name
     
@@ -17,6 +25,22 @@ def find_proc(pname):
         except psutil.NoSuchProcess:
             pass
     return None
+
+
+def get_procs(pname):
+    """ get all process named pname
+    
+    """
+    procs = []
+    for proc in psutil.process_iter():
+        try:
+            if proc.name().lower() == pname.lower():
+                procs.append(proc)
+        except psutil.AccessDenied:
+            pass
+        except psutil.NoSuchProcess:
+            pass
+    return procs
 
 
 class ProcWatcher(threading.Thread):

@@ -8,6 +8,7 @@ class MonitorFrame(wx.Frame):
         wx.Frame.__init__(self, parent=None, id=-1,
                 title="PerfTrack",
                 pos=(100, 100), size=(800, 600))
+        self.conf = dict()
         self.BuildUI()
         # self.InitSearchCtrls()
 
@@ -88,15 +89,34 @@ class MonitorFrame(wx.Frame):
 
     def OnProcInputChanged(self, event):
         input_text = self.proc_name_value.GetValue().strip()
-        if 0 == len(input_text):
-            self.proc_msg.SetValue('Please input a process name or ID')
-        else:
-            proc = monitor.find_proc(input_text)
-            if proc is None:
-                self.proc_msg.SetValue('Proc not exists')
-            else:
-                self.proc_msg.SetValue('Proc ID: %s' % proc.pid)
+        self.InitPid(input_text)
 
+    def InitPid(self, input_text):
+        if input_text.isdigit():  # Process ID
+            self.conf['pid'] = self.MatchProcID(int(input_text))
+            if self.conf['pid'] is not None:
+                return
+        self.conf['pid'] = self.MatchProcName(input_text)  # else Process name
+
+    def MatchProcID(self, pid):
+        proc = monitor.init_proc(pid)
+        if proc is not None:  # get process by Name
+            self.proc_msg.SetValue('Proc ID: %s, Process Name: %s' % (proc.pid, proc.name()))
+            return pid
+        else:
+            return None
+
+    def MatchProcName(self, pname):
+        if 0 == len(pname):
+            self.proc_msg.SetValue('Please input a process name or ID')
+            return None
+        proc = monitor.get_procs(pname)
+        if 0 == len(proc):
+            self.proc_msg.SetValue('Proc not exists or AccessDenied')
+        elif len(proc) > 1:
+            self.proc_msg.SetValue('Multi Processes Match, use Process ID instead')
+        else:
+            self.proc_msg.SetValue('Proc ID: %s' % proc.pop().pid)
 
 class MonitorUI(wx.App):
 
