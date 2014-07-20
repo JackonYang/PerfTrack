@@ -1,4 +1,4 @@
-# -*- coding: utf-8-*-
+#-*- coding: utf-8-*-
 import wx
 import monitor
 
@@ -7,37 +7,53 @@ class MonitorFrame(wx.Frame):
     def __init__(self):
         wx.Frame.__init__(self, parent=None, id=-1,
                 title="PerfTrack",
-                pos=(100, 100), size=(500, 600))
+                pos=(100, 100), size=(800, 600))
         self.BuildUI()
+        # self.InitSearchCtrls()
 
     def BuildUI(self):
-        # perf log box
-        self.perf_log = wx.TextCtrl(parent=self,
-                style=wx.TE_AUTO_SCROLL | wx.TE_MULTILINE)
-        self.perf_log.SetEditable(False)
+        # config box
+        self.proc_name_label = wx.StaticText(parent=self, label='Process: ', style=wx.ALIGN_CENTER)
+        self.proc_name_value = wx.TextCtrl(parent=self, value='python')
+        self.proc_name_box = wx.BoxSizer(wx.HORIZONTAL)
+        self.proc_name_box.Add(self.proc_name_label, 1, wx.ALIGN_CENTER, 5, 0)
+        self.proc_name_box.Add(self.proc_name_value, 2, wx.ALIGN_CENTER, 5, 0)
+
+        self.proc_msg = wx.StaticText(parent=self, label='Please input a process name or ID', style=wx.LEFT)
+        msg_font = wx.Font(10, wx.DECORATIVE, wx.ITALIC, wx.NORMAL)
+        self.proc_msg.SetFont(msg_font)
+        #self.proc_name = wx.SearchCtrl(self)
+        self.configBox= wx.BoxSizer(wx.VERTICAL)
+        self.configBox.AddSpacer(10)
+        self.configBox.Add(self.proc_name_box, 0, wx.LEFT, 5, 0)
+        self.configBox.Add(self.proc_msg, 1, wx.LEFT, 5, 0)
+        #self.configBox.Add(self.proc_name, 1, wx.ALL | wx.EXPAND, 5, 0)
 
         # toolbox, start stop
-        self.startBtn = wx.Button(parent=self, label="Start")
+        self.startBtn = wx.Button(parent=self, label="Start", size=(60, 60))
         self.stopBtn = wx.Button(parent=self, label="Stop")
         self.showBtn = wx.Button(parent=self, label="Show")
-
-        self.proc_name_label = wx.StaticText(parent=self, label='Process Name', style=wx.ALIGN_CENTER)
-        self.proc_name_value = wx.TextCtrl(parent=self, value='python')
+        self.controlBox = wx.BoxSizer(wx.HORIZONTAL)
+        self.controlBox.Add(self.startBtn, 1, wx.ALL | wx.EXPAND, 5, 0)
+        self.controlBox.Add(self.showBtn, 1, wx.ALL | wx.EXPAND, 5, 0)
+        self.controlBox.Add(self.stopBtn, 1, wx.ALL | wx.EXPAND, 5, 0)
 
         self.startBtn.Enable()
         self.stopBtn.Disable()
 
-        self.toolbox = wx.BoxSizer(wx.VERTICAL)
-        self.toolbox.Add(self.proc_name_label, 1, wx.ALL | wx.EXPAND, 5, 0)
-        self.toolbox.Add(self.proc_name_value, 1, wx.ALL | wx.EXPAND, 5, 0)
-        self.toolbox.Add(self.startBtn, 1, wx.ALL | wx.EXPAND, 5, 0)
-        self.toolbox.Add(self.showBtn, 1, wx.ALL | wx.EXPAND, 5, 0)
-        self.toolbox.Add(self.stopBtn, 1, wx.ALL | wx.EXPAND, 5, 0)
+        self.toolbox = wx.BoxSizer(wx.HORIZONTAL)
+        self.toolbox.Add(self.configBox, 3, wx.ALL, 5, 0)
+        self.toolbox.Add(self.controlBox, 2, wx.RIGHT, 5, 0)
+
+        # perf log box
+        self.perf_log = wx.TextCtrl(parent=self,
+                style=wx.TE_AUTO_SCROLL | wx.TE_MULTILINE)
+        self.perf_log.SetEditable(False)
  
         # main box
-        self.mainbox = wx.BoxSizer(wx.HORIZONTAL)
-        self.mainbox.Add(self.perf_log, 1, wx.ALL | wx.EXPAND, 5, 5)
+        self.mainbox = wx.BoxSizer(wx.VERTICAL)
         self.mainbox.Add(self.toolbox, 0, wx.NORMAL, 0, 0)
+        self.mainbox.Add(self.perf_log, 1, wx.ALL | wx.EXPAND, 5, 5)
 
         self.SetSizer(self.mainbox)
         self.CenterOnScreen()
