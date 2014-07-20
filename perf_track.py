@@ -69,8 +69,11 @@ class MonitorFrame(wx.Frame):
         self.showBtn.Disable()
         self.stopBtn.Enable()
         # start thread
+        def update_log(*args):
+            wx.CallAfter(self.perf_log.AppendText, *args)
+
         proc = monitor.get_proc_by_name(self.proc_name_value.GetValue())
-        self.mem_watcher = monitor.ProcWatcher(proc, self.perf_log.AppendText, 1)
+        self.mem_watcher = monitor.ProcWatcher(proc, update_log, 1)
         self.mem_watcher.start()
 
     def OnStopScan(self, event):
