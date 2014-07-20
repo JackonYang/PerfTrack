@@ -3,7 +3,7 @@ import psutil
 import time
 import threading
 
-def get_proc_by_name(pname):
+def find_proc(pname):
     """ get process by name
     
     return the first process if there are more than one
@@ -39,7 +39,7 @@ class ProcWatcher(threading.Thread):
 if '__main__' == __name__:
     def tout(msg):
         print msg
-    mem_watcher = ProcWatcher(get_proc_by_name("CHrome"), tout, 1)
+    mem_watcher = ProcWatcher(find_proc("CHrome"), tout, 1)
     mem_watcher.start()
     time.sleep(10)
     mem_watcher.stop()

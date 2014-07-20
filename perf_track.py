@@ -19,7 +19,7 @@ class MonitorFrame(wx.Frame):
         self.proc_name_box.Add(self.proc_name_label, 1, wx.ALIGN_CENTER, 5, 0)
         self.proc_name_box.Add(self.proc_name_value, 2, wx.ALIGN_CENTER, 5, 0)
 
-        self.proc_msg = wx.TextCtrl(parent=self, value='Please input a process name or ID', size=(450, 30), style=wx.TE_READONLY|wx.BORDER_NONE)
+        self.proc_msg = wx.TextCtrl(parent=self, value='Please input a process name or ID', size=(450, 30), style=wx.TE_READONLY|wx.BORDER_NONE|wx.ST_NO_AUTORESIZE)
         self.proc_msg.SetBackgroundColour(self.proc_name_label.BackgroundColour)
         msg_font = wx.Font(10, wx.DECORATIVE, wx.ITALIC, wx.NORMAL)
         self.proc_msg.SetFont(msg_font)
@@ -61,7 +61,8 @@ class MonitorFrame(wx.Frame):
 
         self.startBtn.Bind(wx.EVT_BUTTON, self.OnStartScan)
         self.stopBtn.Bind(wx.EVT_BUTTON, self.OnStopScan)
-        self.proc_name_value.Bind(wx.EVT_KILL_FOCUS, self.OnProcInput)
+        #self.proc_name_value.Bind(wx.EVT_KILL_FOCUS, self.OnProcInput)
+        self.proc_name_value.Bind(wx.EVT_TEXT, self.OnProcInputChanged)
 
     def OnStartScan(self, event):
         # clear log if too big
@@ -74,7 +75,7 @@ class MonitorFrame(wx.Frame):
         def update_log(*args):
             wx.CallAfter(self.perf_log.AppendText, *args)
 
-        proc = monitor.get_proc_by_name(self.proc_name_value.GetValue())
+        proc = monitor.find_proc(self.proc_name_value.GetValue())
         self.mem_watcher = monitor.ProcWatcher(proc, update_log, 1)
         self.mem_watcher.start()
 
@@ -85,10 +86,16 @@ class MonitorFrame(wx.Frame):
         # stop thread
         self.mem_watcher.stop()
 
-    def OnProcInput(self, event):
-        pass
-        # self.proc_msg.
-
+    def OnProcInputChanged(self, event):
+        input_text = self.proc_name_value.GetValue().strip()
+        if 0 == len(input_text):
+            self.proc_msg.SetValue('Please input a process name or ID')
+        else:
+            proc = monitor.find_proc(input_text)
+            if proc is None:
+                self.proc_msg.SetValue('Proc not exists')
+            else:
+                self.proc_msg.SetValue('Proc ID: %s' % proc.pid)
 
 
 class MonitorUI(wx.App):
@@ -98,6 +105,7 @@ class MonitorUI(wx.App):
         self.SetTopWindow(frame)
         frame.Show()
         return True
+
 
 if '__main__' == __name__:
     app = MonitorUI()
