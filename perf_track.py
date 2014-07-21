@@ -86,13 +86,12 @@ class MonitorFrame(wx.Frame):
             dlg = wx.MessageDialog(None, msg, "%s Error" % __app_name__, wx.ICON_ERROR)
             dlg.ShowModal()
             return None
-        # clear log if too big
-        if len(self.track_log.GetValue()) > 1024:
-            self.track_log.SetValue('')
+        # transfer button status
         self.startBtn.Disable()
         self.showBtn.Disable()
         self.stopBtn.Enable()
-        # start thread
+        # clear log
+        self.track_log.SetValue('')
         wx.CallAfter(self.StartTrack, self.proc_tracking, self.proc_name_value.GetValue())
 
     def update_log(self, *args):
