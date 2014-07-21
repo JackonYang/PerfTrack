@@ -3,35 +3,47 @@ import wx
 import monitor
 
 
+__app_name__ = 'PerfTrack'
+__author__ = 'Jackon Yang'
+__email__ = 'jiekunyang@gmail.com'
+
+
+def format_proc(proc):
+    """brief description of proc in string format
+
+    get all info from proc to make sure that they in correct case
+    """
+    return 'Process Name: %s, ID: %s.' % (proc.name(), proc.pid)
+
+
 class MonitorFrame(wx.Frame):
     def __init__(self):
         wx.Frame.__init__(self, parent=None, id=-1,
-                title="PerfTrack",
+                title=__app_name__,
                 pos=(100, 100), size=(800, 600))
         self.conf = dict()
         self.BuildUI()
         # self.InitSearchCtrls()
+        self.proc_tracking = None
 
     def BuildUI(self):
-        # config box
-        self.proc_name_label = wx.StaticText(parent=self, label='Process: ', style=wx.ALIGN_CENTER)
-        self.proc_name_value = wx.TextCtrl(parent=self, value='python')
+        # ------- config box ------------
+        # process name
+        self.proc_name_label = wx.StaticText(parent=self, label='Process Name: ', style=wx.ALIGN_CENTER)
+        self.proc_name_value = wx.TextCtrl(parent=self, value='')
         self.proc_name_box = wx.BoxSizer(wx.HORIZONTAL)
         self.proc_name_box.Add(self.proc_name_label, 1, wx.ALIGN_CENTER, 5, 0)
         self.proc_name_box.Add(self.proc_name_value, 2, wx.ALIGN_CENTER, 5, 0)
-
-        self.proc_msg = wx.TextCtrl(parent=self, value='Please input a process name or ID', size=(450, 30), style=wx.TE_READONLY|wx.BORDER_NONE|wx.ST_NO_AUTORESIZE)
-        self.proc_msg.SetBackgroundColour(self.proc_name_label.BackgroundColour)
-        msg_font = wx.Font(10, wx.DECORATIVE, wx.ITALIC, wx.NORMAL)
-        self.proc_msg.SetFont(msg_font)
-        #self.proc_name = wx.SearchCtrl(self)
+        # input response
+        self.proc_msg = wx.StaticText(parent=self, label='', size=(450, 30), style=wx.ALIGN_LEFT|wx.ST_NO_AUTORESIZE)
+        # add to config box
         self.configBox= wx.BoxSizer(wx.VERTICAL)
         self.configBox.AddSpacer(10)
         self.configBox.Add(self.proc_name_box, 0, wx.LEFT, 5, 0)
+        self.configBox.AddSpacer(10)
         self.configBox.Add(self.proc_msg, 1, wx.LEFT, 5, 0)
-        #self.configBox.Add(self.proc_name, 1, wx.ALL | wx.EXPAND, 5, 0)
 
-        # toolbox, start stop
+        # ------- control box ------------
         self.startBtn = wx.Button(parent=self, label="Start", size=(60, 60))
         self.stopBtn = wx.Button(parent=self, label="Stop")
         self.showBtn = wx.Button(parent=self, label="Show")
@@ -43,42 +55,55 @@ class MonitorFrame(wx.Frame):
         self.startBtn.Enable()
         self.stopBtn.Disable()
 
+        # ------- tool box(config, control) -------
         self.toolbox = wx.BoxSizer(wx.HORIZONTAL)
         self.toolbox.Add(self.configBox, 3, wx.ALL, 5, 0)
         self.toolbox.Add(self.controlBox, 2, wx.RIGHT, 5, 0)
-
-        # perf log box
-        self.perf_log = wx.TextCtrl(parent=self,
-                style=wx.TE_AUTO_SCROLL | wx.TE_MULTILINE)
-        self.perf_log.SetEditable(False)
- 
-        # main box
+        # ------- track log box -------------------
+        self.track_log = wx.TextCtrl(parent=self, style=wx.TE_AUTO_SCROLL | wx.TE_MULTILINE)
+        self.track_log.SetEditable(False)
+        # ------- main box(tool, tracklog) --------
         self.mainbox = wx.BoxSizer(wx.VERTICAL)
         self.mainbox.Add(self.toolbox, 0, wx.NORMAL, 0, 0)
-        self.mainbox.Add(self.perf_log, 1, wx.ALL | wx.EXPAND, 5, 5)
+        self.mainbox.Add(self.track_log, 1, wx.ALL | wx.EXPAND, 5, 5)
 
         self.SetSizer(self.mainbox)
         self.CenterOnScreen()
 
         self.startBtn.Bind(wx.EVT_BUTTON, self.OnStartScan)
         self.stopBtn.Bind(wx.EVT_BUTTON, self.OnStopScan)
-        #self.proc_name_value.Bind(wx.EVT_KILL_FOCUS, self.OnProcInput)
         self.proc_name_value.Bind(wx.EVT_TEXT, self.OnProcInputChanged)
 
     def OnStartScan(self, event):
+        proc_name = self.proc_name_value.GetValue().strip()
+        if self.proc_tracking is None and len(proc_name) > 0:
+            self.MatchProcName(proc_name)
+        if self.proc_tracking is None:
+            if 0 == len(proc_name):
+                msg = 'Please input a process name!'
+            else:
+                msg = 'No such process!\nMake sure that %s is running and then start %s' % (proc_name, __app_name__)
+            dlg = wx.MessageDialog(None, msg, "%s Error" % __app_name__, wx.ICON_ERROR)
+            dlg.ShowModal()
+            return None
         # clear log if too big
-        if len(self.perf_log.GetValue()) > 1024:
-            self.perf_log.SetValue('')
+        if len(self.track_log.GetValue()) > 1024:
+            self.track_log.SetValue('')
         self.startBtn.Disable()
         self.showBtn.Disable()
         self.stopBtn.Enable()
         # start thread
-        def update_log(*args):
-            wx.CallAfter(self.perf_log.AppendText, *args)
+        wx.CallAfter(self.StartTrack, self.proc_tracking, self.proc_name_value.GetValue())
 
-        proc = monitor.find_proc(self.proc_name_value.GetValue())
-        self.mem_watcher = monitor.ProcWatcher(proc, update_log, 1)
+    def update_log(self, *args):
+        wx.CallAfter(self.track_log.AppendText, *args)
+
+    def StartTrack(self, proc, proc_name):
+        #while proc is None:
+        #    proc = monitor.find_proc(proc_name)
+        self.mem_watcher = monitor.ProcWatcher(proc, self.update_log, 1)
         self.mem_watcher.start()
+        # deal with close proc while monitoring
 
     def OnStopScan(self, event):
         self.startBtn.Enable()
@@ -88,35 +113,24 @@ class MonitorFrame(wx.Frame):
         self.mem_watcher.stop()
 
     def OnProcInputChanged(self, event):
-        input_text = self.proc_name_value.GetValue().strip()
-        self.InitPid(input_text)
-
-    def InitPid(self, input_text):
-        if input_text.isdigit():  # Process ID
-            self.conf['pid'] = self.MatchProcID(int(input_text))
-            if self.conf['pid'] is not None:
-                return
-        self.conf['pid'] = self.MatchProcName(input_text)  # else Process name
-
-    def MatchProcID(self, pid):
-        proc = monitor.init_proc(pid)
-        if proc is not None:  # get process by Name
-            self.proc_msg.SetValue('Proc ID: %s, Process Name: %s' % (proc.pid, proc.name()))
-            return pid
-        else:
-            return None
+        self.MatchProcName(self.proc_name_value.GetValue().strip())
 
     def MatchProcName(self, pname):
+        self.proc_tracking = None
         if 0 == len(pname):
-            self.proc_msg.SetValue('Please input a process name or ID')
+            self.proc_msg.SetLabel('Please input a process name')
             return None
-        proc = monitor.get_procs(pname)
-        if 0 == len(proc):
-            self.proc_msg.SetValue('Proc not exists or AccessDenied')
-        elif len(proc) > 1:
-            self.proc_msg.SetValue('Multi Processes Match, use Process ID instead')
+        procs = monitor.get_procs(pname)
+        if 0 == len(procs):
+            self.proc_msg.SetLabel('Process not exists or AccessDenied')
+            return None
+        self.proc_tracking = procs[0]
+        if len(procs) > 1:
+            self.proc_msg.SetLabel('Multi Processes Match, use %s' % format_proc(self.proc_tracking))
         else:
-            self.proc_msg.SetValue('Proc ID: %s' % proc.pop().pid)
+            self.proc_msg.SetLabel(format_proc(self.proc_tracking))
+        return self.proc_tracking
+
 
 class MonitorUI(wx.App):
 
