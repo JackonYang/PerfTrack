@@ -76,6 +76,7 @@ class MonitorFrame(wx.Frame):
         self.stopBtn.Bind(wx.EVT_BUTTON, self.OnStopTrack)
         self.proc_name_value.Bind(wx.EVT_TEXT, self.OnProcInputChanged)
         self.proc_name_value.Bind(wx.EVT_TEXT_ENTER, self.OnStartTrack)
+        self.Bind(wx.EVT_ACTIVATE, self.OnWindowActivate)
 
     def OnStartTrack(self, event):
         if self.proc_running:
@@ -117,6 +118,10 @@ class MonitorFrame(wx.Frame):
         # stop thread
         self.mem_watcher.stop()
         self.proc_running = False
+
+    def OnWindowActivate(self, event):
+        if not self.proc_running:
+            self.MatchProcName(self.proc_name_value.GetValue().strip())
 
     def OnProcInputChanged(self, event):
         self.MatchProcName(self.proc_name_value.GetValue().strip())
