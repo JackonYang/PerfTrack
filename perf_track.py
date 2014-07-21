@@ -25,6 +25,7 @@ class MonitorFrame(wx.Frame):
         self.BuildUI()
         # self.InitSearchCtrls()
         self.proc_tracking = None
+        self.proc_name_value.SetFocus()
 
     def BuildUI(self):
         # ------- config box ------------
