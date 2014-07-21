@@ -25,13 +25,14 @@ class MonitorFrame(wx.Frame):
         self.BuildUI()
         # self.InitSearchCtrls()
         self.proc_tracking = None
+        self.proc_running = False
         self.proc_name_value.SetFocus()
 
     def BuildUI(self):
         # ------- config box ------------
         # process name
         self.proc_name_label = wx.StaticText(parent=self, label='Process Name: ', style=wx.ALIGN_CENTER)
-        self.proc_name_value = wx.TextCtrl(parent=self, value='')
+        self.proc_name_value = wx.TextCtrl(parent=self, value='', style=wx.TE_PROCESS_ENTER)
         self.proc_name_box = wx.BoxSizer(wx.HORIZONTAL)
         self.proc_name_box.Add(self.proc_name_label, 1, wx.ALIGN_CENTER, 5, 0)
         self.proc_name_box.Add(self.proc_name_value, 2, wx.ALIGN_CENTER, 5, 0)
@@ -71,11 +72,14 @@ class MonitorFrame(wx.Frame):
         self.SetSizer(self.mainbox)
         self.CenterOnScreen()
 
-        self.startBtn.Bind(wx.EVT_BUTTON, self.OnStartScan)
-        self.stopBtn.Bind(wx.EVT_BUTTON, self.OnStopScan)
+        self.startBtn.Bind(wx.EVT_BUTTON, self.OnStartTrack)
+        self.stopBtn.Bind(wx.EVT_BUTTON, self.OnStopTrack)
         self.proc_name_value.Bind(wx.EVT_TEXT, self.OnProcInputChanged)
+        self.proc_name_value.Bind(wx.EVT_TEXT_ENTER, self.OnStartTrack)
 
-    def OnStartScan(self, event):
+    def OnStartTrack(self, event):
+        if self.proc_running:
+            return
         proc_name = self.proc_name_value.GetValue().strip()
         if self.proc_tracking is None and len(proc_name) > 0:
             self.MatchProcName(proc_name)
@@ -103,14 +107,16 @@ class MonitorFrame(wx.Frame):
         #    proc = monitor.find_proc(proc_name)
         self.mem_watcher = monitor.ProcWatcher(proc, self.update_log, 1)
         self.mem_watcher.start()
+        self.proc_running = True
         # deal with close proc while monitoring
 
-    def OnStopScan(self, event):
+    def OnStopTrack(self, event):
         self.startBtn.Enable()
         self.showBtn.Enable()
         self.stopBtn.Disable()
         # stop thread
         self.mem_watcher.stop()
+        self.proc_running = False
 
     def OnProcInputChanged(self, event):
         self.MatchProcName(self.proc_name_value.GetValue().strip())
