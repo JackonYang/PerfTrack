@@ -43,6 +43,16 @@ def get_procs(pname):
     return procs
 
 
+def get_rss_mem(proc, value_if_None=0):
+
+    if proc is None:
+        return value_if_None
+    try:
+        return proc.memory_info().rss
+    except psutil.NoSuchProcess:
+        return value_if_None
+
+
 class ProcWatcher(threading.Thread):
     def __init__(self, proc, output, interval):
         threading.Thread.__init__(self)

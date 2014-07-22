@@ -194,10 +194,10 @@ class MonitorFrame(wx.Frame):
         # restore the clean background, saved at the beginning
         self.canvas.restore_region(self.bg)
         # get new perf data
-        # while proc is None:
-        #    proc = monitor.find_proc(proc_name)
-        # deal with close proc while monitoring
-        rss_mem = getSizeInMb(self.proc_tracking.memory_info().rss)
+        if self.proc_tracking is None:
+            proc_name = self.proc_name_value.GetValue().strip()
+            self.proc_tracking = monitor.find_proc(proc_name)
+        rss_mem = getSizeInMb(monitor.get_rss_mem(self.proc_tracking))
         # update log
         wx.CallAfter(self.update_log, rss_mem)
         # plot
