@@ -27,7 +27,7 @@ def format_proc(proc):
 
     get all info from proc to make sure that they in correct case
     """
-    return 'Process Name: %s, ID: %s.' % (proc.name(), proc.pid)
+    return 'Process Name: %s, ID: %s, Memory(RSS): %s MB.' % (proc.name(), proc.pid, getSizeInMb(monitor.get_rss_mem(proc)))
 
 
 class MonitorFrame(wx.Frame):
@@ -57,7 +57,7 @@ class MonitorFrame(wx.Frame):
         self.proc_name_box.Add(self.proc_name_label, 1, wx.ALIGN_CENTER, 5, 0)
         self.proc_name_box.Add(self.proc_name_value, 2, wx.ALIGN_CENTER, 5, 0)
         # input response
-        self.proc_msg = wx.StaticText(parent=self, label='', size=(450, 30), style=wx.ALIGN_LEFT|wx.ST_NO_AUTORESIZE)
+        self.proc_msg = wx.StaticText(parent=self, label='', size=(800, 30), style=wx.ALIGN_LEFT|wx.ST_NO_AUTORESIZE)
         # add to config box
         self.configBox= wx.BoxSizer(wx.VERTICAL)
         self.configBox.Add(self.proc_name_box, 1, wx.LEFT|wx.ALIGN_CENTER_VERTICAL, 5, 0)
@@ -172,7 +172,7 @@ class MonitorFrame(wx.Frame):
             return None
         self.proc_tracking = procs[0]
         if len(procs) > 1:
-            self.proc_msg.SetLabel('Multi Processes Match, use %s' % format_proc(self.proc_tracking))
+            self.proc_msg.SetLabel('Warning! Multi Processes Match. use %s' % format_proc(self.proc_tracking))
         else:
             self.proc_msg.SetLabel(format_proc(self.proc_tracking))
         return self.proc_tracking
