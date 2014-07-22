@@ -109,17 +109,23 @@ class MonitorFrame(wx.Frame):
     def OnStartTrack(self, event):
         if self.proc_running:
             return
+
         proc_name = self.proc_name_value.GetValue().strip()
-        if self.proc_tracking is None and len(proc_name) > 0:
-            self.MatchProcName(proc_name)
-        if self.proc_tracking is None:
-            if 0 == len(proc_name):
-                msg = 'Please input a process name!'
-            else:
-                msg = 'No such process!\nMake sure that %s is running and then start %s' % (proc_name, __app_name__)
+
+        if 0 == len(proc_name):
+            msg = 'Please input a process name!'
             dlg = wx.MessageDialog(None, msg, "%s Error" % __app_name__, wx.ICON_ERROR)
             dlg.ShowModal()
             return None
+
+        if self.proc_tracking is None:
+            self.MatchProcName(proc_name)
+            if self.proc_tracking is None:
+                msg = 'No such process!\nGo on to track %s?' % proc_name
+                dlg = wx.MessageDialog(None, msg, "%s Error" % __app_name__, wx.YES_NO|wx.ICON_QUESTION)
+                if dlg.ShowModal() != wx.ID_YES:
+                    return None
+
         # transfer button status
         self.startBtn.Disable()
         self.showBtn.Disable()
