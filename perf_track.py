@@ -28,10 +28,10 @@ class MonitorFrame(wx.Frame):
     def __init__(self):
         wx.Frame.__init__(self, parent=None, id=-1,
                 title=__app_name__,
-                pos=(100, 100), size=(800, 600))
+                pos=(10, 10),
+                size=(1200, 730))
         self.conf = dict()
         self.BuildUI()
-        # self.InitSearchCtrls()
         self.proc_tracking = None
         self.proc_running = False
         self.proc_name_value.SetFocus()
@@ -79,11 +79,11 @@ class MonitorFrame(wx.Frame):
         self.bg = self.canvas.copy_from_bbox(self.ax.bbox)
         self.dispbox = wx.BoxSizer(wx.HORIZONTAL)
         self.dispbox.Add(self.track_log, 1, wx.ALL|wx.EXPAND, 5, 5)
-        self.dispbox.Add(self.canvas, 5, wx.ALL|wx.EXPAND, 5, 5)
+        self.dispbox.Add(self.canvas, 0, wx.ALL|wx.EXPAND, 5, 5)
         # ------- main box(tool, tracklog) --------
         self.mainbox = wx.BoxSizer(wx.VERTICAL)
         self.mainbox.Add(self.toolbox, 1, wx.NORMAL, 0, 0)
-        self.mainbox.Add(self.dispbox, 5, wx.ALL|wx.EXPAND, 5, 5)
+        self.mainbox.Add(self.dispbox, 0, wx.EXPAND, 5, 5)
 
         self.SetSizer(self.mainbox)
         self.CenterOnScreen()
@@ -123,19 +123,19 @@ class MonitorFrame(wx.Frame):
     def StartTrack(self, proc, proc_name):
         #while proc is None:
         #    proc = monitor.find_proc(proc_name)
-        self.mem_watcher = monitor.ProcWatcher(proc, self.update_log, 1)
-        self.mem_watcher.start()
+        #self.mem_watcher = monitor.ProcWatcher(proc, self.update_log, 1)
+        #self.mem_watcher.start()
         self.proc_running = True
         # deal with close proc while monitoring
         # plot
-        self.t.Start(1000)
+        self.t.Start(50)
 
     def OnStopTrack(self, event):
         self.startBtn.Enable()
         self.showBtn.Enable()
         self.stopBtn.Disable()
         # stop thread
-        self.mem_watcher.stop()
+        #self.mem_watcher.stop()
         self.t.Stop()
         self.proc_running = False
 
@@ -163,7 +163,7 @@ class MonitorFrame(wx.Frame):
         return self.proc_tracking
 
     def InitPlotUI(self):
-        fig = Figure(figsize=(6, 4), dpi=100)
+        fig = Figure(figsize=(8, 6), dpi=100)
         self.ax = fig.add_subplot(111)
 
         # limit the X and Y axes dimensions
@@ -190,8 +190,9 @@ class MonitorFrame(wx.Frame):
         # restore the clean background, saved at the beginning
         self.canvas.restore_region(self.bg)
         # update the data
-        temp = np.random.randint(10,80)
-        self.user = self.user[1:] + [temp]
+        rss_mem = float(self.proc_tracking.memory_info().rss)/1024/1024
+        wx.CallAfter(self.track_log.AppendText, '%.4f MB\n' % rss_mem)
+        self.user = self.user[1:] + [rss_mem]
         # update the plot
         self.l_user.set_ydata(self.user)
         # just draw the "animated" objects
