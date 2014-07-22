@@ -2,6 +2,8 @@
 import wx
 import monitor
 
+import param
+
 from matplotlib.figure import Figure
 import numpy as np
 from matplotlib import font_manager
@@ -14,7 +16,6 @@ __author__ = 'Jackon Yang'
 __email__ = 'jiekunyang@gmail.com'
 
 TIMER_ID = wx.NewId()
-POINTS = 300
 
 def format_proc(proc):
     """brief description of proc in string format
@@ -29,12 +30,19 @@ class MonitorFrame(wx.Frame):
         wx.Frame.__init__(self, parent=None, id=-1,
                 title=__app_name__,
                 pos=(10, 10), size=(1200, 620))
-        self.conf = dict()
+        self.LoadParam()
         self.BuildUI()
         self.proc_tracking = None
         self.proc_running = False
         self.proc_name_value.SetFocus()
         self.t = wx.Timer(self, TIMER_ID)
+
+    def LoadParam(self):
+        self.settings = param.load_param('config.json')
+        if 'xmin' not in self.settings:
+            self.settings['xmin'] = 0
+        if 'xmax' not in self.settings:
+            self.settings['xmax'] = self.settings['points']
 
     def BuildUI(self):
         # ------- config box ------------
@@ -161,21 +169,21 @@ class MonitorFrame(wx.Frame):
         return self.proc_tracking
 
     def InitPlotUI(self):
+        plot_points = self.settings['points']
         fig = Figure(figsize=(9, 5), dpi=100)
         self.ax = fig.add_subplot(111)
 
-        # limit the X and Y axes dimensions
-        self.ax.set_ylim([0, 100])
-        self.ax.set_xlim([0, POINTS])
+        self.ax.set_ylim([self.settings['ymin'], self.settings['ymax']])
+        self.ax.set_xlim([self.settings['xmin'], self.settings['xmax']])
         self.ax.set_autoscale_on(False)
 
         self.ax.set_xticks([])
-        self.ax.set_yticks(range(0, 101, 10))
+        self.ax.set_yticks(range(self.settings['ymin'], self.settings['ymax']+1, self.settings['ystep']))
 
         self.ax.grid(True)
 
-        self.user = [None] * POINTS
-        self.l_user,=self.ax.plot(range(POINTS), self.user, label='User %')
+        self.mem_rss_data = [None] * plot_points
+        self.l_mem_rss,=self.ax.plot(range(plot_points), self.mem_rss_data, label='Memory(RSS) %')
 
         # add the legend
         self.ax.legend(loc='upper center',
@@ -190,11 +198,11 @@ class MonitorFrame(wx.Frame):
         # update the data
         rss_mem = float(self.proc_tracking.memory_info().rss)/1024/1024
         wx.CallAfter(self.track_log.AppendText, '%.4f MB\n' % rss_mem)
-        self.user = self.user[1:] + [rss_mem]
+        self.mem_rss_data = self.mem_rss_data[1:] + [rss_mem]
         # update the plot
-        self.l_user.set_ydata(self.user)
+        self.l_mem_rss.set_ydata(self.mem_rss_data)
         # just draw the "animated" objects
-        self.ax.draw_artist(self.l_user)# It is used to efficiently update Axes data (axis ticks, labels, etc are not updated)
+        self.ax.draw_artist(self.l_mem_rss)# It is used to efficiently update Axes data (axis ticks, labels, etc are not updated)
         self.canvas.blit(self.ax.bbox)
 
 

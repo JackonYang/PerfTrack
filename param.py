@@ -20,7 +20,7 @@ class Validator:
         return is_number(ymax) and is_number(ymin) and is_number(ystep) and ymin < ymax
 
 
-def load_conf(filename):
+def load_param(filename):
     required = ['process_name', 'interval', 'points', 'ymin', 'ymax', 'ystep']
     params = json.load(open(filename))
     return params

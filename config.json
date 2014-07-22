@@ -1,8 +1,8 @@
 {
     "process_name": "python",
-    "interval": 1,
-    "POINTS": 300,
+    "interval": 50,
+    "points": 300,
     "ymin": 0,
-    "ymax": 100,
-    "ystep": 10
+    "ymax": 400,
+    "ystep": 20
 }
