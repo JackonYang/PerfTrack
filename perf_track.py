@@ -37,8 +37,7 @@ class MonitorFrame(wx.Frame):
                 pos=(10, 10), size=(1200, 620))
         self.LoadParam()
         self.BuildUI()
-        self.proc_tracking = None
-        self.proc_running = False
+        self.InitUiParam()
         self.proc_name_value.SetFocus()
         self.t = wx.Timer(self, TIMER_ID)
 
@@ -106,8 +105,14 @@ class MonitorFrame(wx.Frame):
         self.Bind(wx.EVT_ACTIVATE, self.OnWindowActivate)
         wx.EVT_TIMER(self, TIMER_ID, self.onTimer)
 
+    def InitUiParam(self):
+        self.proc_name_value.SetValue(self.settings['process_name'])
+        self.proc_tracking = None
+        self.is_track_running = False
+
+
     def OnStartTrack(self, event):
-        if self.proc_running:
+        if self.is_track_running:
             return
 
         proc_name = self.proc_name_value.GetValue().strip()
@@ -138,7 +143,7 @@ class MonitorFrame(wx.Frame):
         wx.CallAfter(self.track_log.AppendText, '%.4f MB\n' % disp_data)
 
     def StartTrack(self, proc, proc_name):
-        self.proc_running = True
+        self.is_track_running = True
         self.t.Start(self.settings['interval'])
 
     def OnStopTrack(self, event):
@@ -147,10 +152,10 @@ class MonitorFrame(wx.Frame):
         self.stopBtn.Disable()
         # stop thread
         self.t.Stop()
-        self.proc_running = False
+        self.is_track_running = False
 
     def OnWindowActivate(self, event):
-        if not self.proc_running:
+        if not self.is_track_running:
             self.MatchProcName(self.proc_name_value.GetValue().strip())
 
     def OnProcInputChanged(self, event):
