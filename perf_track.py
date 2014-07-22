@@ -28,8 +28,7 @@ class MonitorFrame(wx.Frame):
     def __init__(self):
         wx.Frame.__init__(self, parent=None, id=-1,
                 title=__app_name__,
-                pos=(10, 10),
-                size=(1200, 730))
+                pos=(10, 10), size=(1200, 620))
         self.conf = dict()
         self.BuildUI()
         self.proc_tracking = None
@@ -49,27 +48,26 @@ class MonitorFrame(wx.Frame):
         self.proc_msg = wx.StaticText(parent=self, label='', size=(450, 30), style=wx.ALIGN_LEFT|wx.ST_NO_AUTORESIZE)
         # add to config box
         self.configBox= wx.BoxSizer(wx.VERTICAL)
-        self.configBox.AddSpacer(10)
-        self.configBox.Add(self.proc_name_box, 1, wx.LEFT, 5, 0)
-        self.configBox.AddSpacer(10)
-        self.configBox.Add(self.proc_msg, 1, wx.LEFT, 5, 0)
+        self.configBox.Add(self.proc_name_box, 1, wx.LEFT|wx.ALIGN_CENTER_VERTICAL, 5, 0)
+        self.configBox.Add(self.proc_msg, 1, wx.LEFT|wx.ALIGN_CENTER_VERTICAL, 5, 0)
 
         # ------- control box ------------
         self.startBtn = wx.Button(parent=self, label="Start", size=(60, 60))
         self.stopBtn = wx.Button(parent=self, label="Stop")
         self.showBtn = wx.Button(parent=self, label="Show")
         self.controlBox = wx.BoxSizer(wx.HORIZONTAL)
-        self.controlBox.Add(self.startBtn, 1, wx.ALL | wx.EXPAND, 5, 0)
-        self.controlBox.Add(self.showBtn, 1, wx.ALL | wx.EXPAND, 5, 0)
-        self.controlBox.Add(self.stopBtn, 1, wx.ALL | wx.EXPAND, 5, 0)
+        self.controlBox.Add(self.startBtn, 1, wx.ALL|wx.EXPAND|wx.ALIGN_CENTER_VERTICAL, 5, 0)
+        self.controlBox.Add(self.showBtn, 1, wx.ALL|wx.EXPAND|wx.ALIGN_CENTER_VERTICAL, 5, 0)
+        self.controlBox.Add(self.stopBtn, 1, wx.ALL|wx.EXPAND|wx.ALIGN_CENTER_VERTICAL, 5, 0)
 
         self.startBtn.Enable()
         self.stopBtn.Disable()
 
         # ------- tool box(config, control) -------
         self.toolbox = wx.BoxSizer(wx.HORIZONTAL)
-        self.toolbox.Add(self.configBox, 3, wx.ALL, 5, 0)
-        self.toolbox.Add(self.controlBox, 2, wx.RIGHT, 5, 0)
+        self.toolbox.AddSpacer(20)
+        self.toolbox.Add(self.configBox, 5, wx.ALL|wx.ALIGN_CENTER, 5, 0)
+        self.toolbox.Add(self.controlBox, 2, wx.ALL|wx.ALIGN_CENTER, 5, 0)
         # ------- track log box -------------------
         self.track_log = wx.TextCtrl(parent=self, style=wx.TE_AUTO_SCROLL | wx.TE_MULTILINE)
         self.track_log.SetEditable(False)
@@ -163,7 +161,7 @@ class MonitorFrame(wx.Frame):
         return self.proc_tracking
 
     def InitPlotUI(self):
-        fig = Figure(figsize=(8, 6), dpi=100)
+        fig = Figure(figsize=(9, 5), dpi=100)
         self.ax = fig.add_subplot(111)
 
         # limit the X and Y axes dimensions
