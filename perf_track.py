@@ -17,6 +17,11 @@ __email__ = 'jiekunyang@gmail.com'
 
 TIMER_ID = wx.NewId()
 
+
+def getSizeInMb(sizeInBytes):
+    return sizeInBytes * 1.0 / 1024 / 1024
+
+
 def format_proc(proc):
     """brief description of proc in string format
 
@@ -123,25 +128,18 @@ class MonitorFrame(wx.Frame):
         self.track_log.SetValue('')
         wx.CallAfter(self.StartTrack, self.proc_tracking, self.proc_name_value.GetValue())
 
-    def update_log(self, *args):
-        wx.CallAfter(self.track_log.AppendText, *args)
+    def update_log(self, disp_data):
+        wx.CallAfter(self.track_log.AppendText, '%.4f MB\n' % disp_data)
 
     def StartTrack(self, proc, proc_name):
-        #while proc is None:
-        #    proc = monitor.find_proc(proc_name)
-        #self.mem_watcher = monitor.ProcWatcher(proc, self.update_log, 1)
-        #self.mem_watcher.start()
         self.proc_running = True
-        # deal with close proc while monitoring
-        # plot
-        self.t.Start(50)
+        self.t.Start(self.settings['interval'])
 
     def OnStopTrack(self, event):
         self.startBtn.Enable()
         self.showBtn.Enable()
         self.stopBtn.Disable()
         # stop thread
-        #self.mem_watcher.stop()
         self.t.Stop()
         self.proc_running = False
 
@@ -195,14 +193,17 @@ class MonitorFrame(wx.Frame):
         """callback function for timer events"""
         # restore the clean background, saved at the beginning
         self.canvas.restore_region(self.bg)
-        # update the data
-        rss_mem = float(self.proc_tracking.memory_info().rss)/1024/1024
-        wx.CallAfter(self.track_log.AppendText, '%.4f MB\n' % rss_mem)
+        # get new perf data
+        # while proc is None:
+        #    proc = monitor.find_proc(proc_name)
+        # deal with close proc while monitoring
+        rss_mem = getSizeInMb(self.proc_tracking.memory_info().rss)
+        # update log
+        wx.CallAfter(self.update_log, rss_mem)
+        # plot
         self.mem_rss_data = self.mem_rss_data[1:] + [rss_mem]
-        # update the plot
         self.l_mem_rss.set_ydata(self.mem_rss_data)
-        # just draw the "animated" objects
-        self.ax.draw_artist(self.l_mem_rss)# It is used to efficiently update Axes data (axis ticks, labels, etc are not updated)
+        self.ax.draw_artist(self.l_mem_rss)
         self.canvas.blit(self.ax.bbox)
 
 
