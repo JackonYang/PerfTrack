@@ -35,4 +35,4 @@ $ ./watch.sh clean
 3. 总的CPU占有率持续超过70%，属于过负荷运行。需定位问题原因并解决。
 
 
-[exp_monitor]:doc/memory_track.jpeg 'example of memory track'
+[exp_monitor]:doc/memory_track.png 'example of memory track'
