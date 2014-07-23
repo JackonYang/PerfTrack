@@ -1,6 +1,7 @@
 #-*- coding: utf-8-*-
 import wx
 import monitor
+import time
 
 import param
 
@@ -29,6 +30,14 @@ def format_proc(proc):
     """
     return 'Process Name: %s, ID: %s, Memory(RSS): %s MB.' % (proc.name(), proc.pid, getSizeInMb(monitor.get_rss_mem(proc)))
 
+
+_log_cache = []
+
+def avg(data):
+    return sum(data)/len(data)
+
+def timestamp():
+    return time.strftime('%Y-%m-%d %H:%M:%S',time.localtime(time.time()))
 
 class MonitorFrame(wx.Frame):
     def __init__(self):
@@ -110,7 +119,6 @@ class MonitorFrame(wx.Frame):
         self.proc_tracking = None
         self.is_track_running = False
 
-
     def OnStartTrack(self, event):
         if self.is_track_running:
             return
@@ -135,12 +143,17 @@ class MonitorFrame(wx.Frame):
         self.startBtn.Disable()
         self.showBtn.Disable()
         self.stopBtn.Enable()
+        self.proc_name_value.Disable()
         # clear log
         self.track_log.SetValue('')
         wx.CallAfter(self.StartTrack, self.proc_tracking, self.proc_name_value.GetValue())
 
     def update_log(self, disp_data):
-        wx.CallAfter(self.track_log.AppendText, '%.4f MB\n' % disp_data)
+        global _log_cache
+        _log_cache.append(disp_data)
+        if len(_log_cache) >= (1000.0/self.settings['interval']):
+            wx.CallAfter(self.track_log.AppendText, '%s | %.4f MB\n' % (timestamp(), avg(_log_cache)))
+            _log_cache = []
 
     def StartTrack(self, proc, proc_name):
         self.is_track_running = True
@@ -150,6 +163,7 @@ class MonitorFrame(wx.Frame):
         self.startBtn.Enable()
         self.showBtn.Enable()
         self.stopBtn.Disable()
+        self.proc_name_value.Enable()
         # stop thread
         self.t.Stop()
         self.is_track_running = False
