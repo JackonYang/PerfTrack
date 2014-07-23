@@ -1,13 +1,10 @@
-linux performance monitoring and visualization
-==============================================
-
-linux 性能监控与图像显示
+Linux/windows performance monitoring and visualization
+======================================================
 
 #### Introduction
 
-启动、关闭~sar~监控系统运行状态，并将性能运行信息写入文件,
-显示性能曲线，清理数据文件。
-显示性能曲线时，根据性能测试的需求，对原始数据进行滤波。
+1. 进程内存（RSS）监控
+2. Linux 系统状态监控，对原始数据进行滤波
 
 滤波原理: 消除周期小、波动幅度低
 的短脉冲，保留缓慢变化曲线和波动幅度大于阈值(默认 5%)的短脉冲。
@@ -38,4 +35,4 @@ $ ./watch.sh clean
 3. 总的CPU占有率持续超过70%，属于过负荷运行。需定位问题原因并解决。
 
 
-[exp_monitor]:example_monitor.jpeg 'example of monitor'
+[exp_monitor]:doc/memory_track.jpeg 'example of memory track'
